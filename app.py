@@ -76,8 +76,8 @@ def search_media(query, media_type=None, tag_filter=None):
 st.markdown("""
 <style>
     :root {
-        --espro-azul: #003C7E;
-        --espro-azul-claro: #0056B3;
+        --espro-azul: #1E88E5;
+        --espro-azul-claro: #42A5F5;
     }
     .espro-header {
         background: linear-gradient(135deg, var(--espro-azul) 0%, var(--espro-azul-claro) 100%);
