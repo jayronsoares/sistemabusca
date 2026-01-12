@@ -12,6 +12,12 @@ st.set_page_config(
     layout="wide"
 )
 
+# Inicializar session state para mensagens
+if 'show_message' not in st.session_state:
+    st.session_state.show_message = None
+if 'message_type' not in st.session_state:
+    st.session_state.message_type = None
+
 # Diretórios
 UPLOAD_DIR = Path("uploads")
 DATABASE_FILE = Path("database/metadata.json")
@@ -174,6 +180,16 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# Mostrar mensagens persistentes
+if st.session_state.show_message:
+    if st.session_state.message_type == 'success':
+        st.success(st.session_state.show_message)
+    elif st.session_state.message_type == 'error':
+        st.error(st.session_state.show_message)
+    # Limpar mensagem após mostrar
+    st.session_state.show_message = None
+    st.session_state.message_type = None
+
 # Sidebar
 with st.sidebar:
     st.markdown("### 📋 Menu")
@@ -289,7 +305,10 @@ elif menu == "➕ Adicionar":
                                 "data_upload": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                             })
                             save_database(db)
-                            st.success(f"✅ {file_type} '{titulo.strip()}' enviado com sucesso!")
+                            
+                            # Salvar mensagem no session state
+                            st.session_state.show_message = f"✅ {file_type} '{titulo.strip()}' enviado com sucesso!"
+                            st.session_state.message_type = 'success'
                             st.balloons()
                             st.rerun()
 
@@ -362,10 +381,13 @@ elif menu == "🔍 Buscar":
                         with col_btn2:
                             if st.button("🗑️ Deletar", key=f"delete_{item['id']}_{idx}", use_container_width=True):
                                 if delete_item(item['id']):
-                                    st.success(f"✅ '{item['titulo']}' deletado!")
+                                    st.session_state.show_message = f"✅ '{item['titulo']}' deletado com sucesso!"
+                                    st.session_state.message_type = 'success'
                                     st.rerun()
                                 else:
-                                    st.error("❌ Erro ao deletar")
+                                    st.session_state.show_message = "❌ Erro ao deletar arquivo"
+                                    st.session_state.message_type = 'error'
+                                    st.rerun()
                         
                         st.markdown('</div>', unsafe_allow_html=True)
             else:
