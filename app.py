@@ -72,12 +72,34 @@ def search_media(query, media_type=None, tag_filter=None):
         results.append(item)
     return results
 
+def delete_item(item_id):
+    """Deleta item do banco e arquivo físico"""
+    db = load_database()
+    item_to_delete = None
+    
+    for item in db:
+        if item['id'] == item_id:
+            item_to_delete = item
+            break
+    
+    if item_to_delete:
+        # Deletar arquivo físico
+        file_path = UPLOAD_DIR / item_to_delete['arquivo']
+        if file_path.exists():
+            file_path.unlink()
+        
+        # Remover do banco
+        db = [item for item in db if item['id'] != item_id]
+        save_database(db)
+        return True
+    return False
+
 # CSS ESPRO
 st.markdown("""
 <style>
     :root {
-        --espro-azul: #003C7E;
-        --espro-azul-claro: #0056B3;
+        --espro-azul: #1E88E5;
+        --espro-azul-claro: #42A5F5;
     }
     .espro-header {
         background: linear-gradient(135deg, var(--espro-azul) 0%, var(--espro-azul-claro) 100%);
@@ -322,16 +344,28 @@ elif menu == "🔍 Buscar":
                             with st.expander("📄 Descrição"):
                                 st.write(item['descricao'])
                         
-                        file_path = UPLOAD_DIR / item['arquivo']
-                        if file_path.exists():
-                            with open(file_path, 'rb') as f:
-                                st.download_button(
-                                    label="⬇️ Baixar",
-                                    data=f,
-                                    file_name=item['arquivo'],
-                                    key=f"download_{item['id']}_{idx}",
-                                    use_container_width=True
-                                )
+                        # Botões de ação
+                        col_btn1, col_btn2 = st.columns(2)
+                        
+                        with col_btn1:
+                            file_path = UPLOAD_DIR / item['arquivo']
+                            if file_path.exists():
+                                with open(file_path, 'rb') as f:
+                                    st.download_button(
+                                        label="⬇️ Baixar",
+                                        data=f,
+                                        file_name=item['arquivo'],
+                                        key=f"download_{item['id']}_{idx}",
+                                        use_container_width=True
+                                    )
+                        
+                        with col_btn2:
+                            if st.button("🗑️ Deletar", key=f"delete_{item['id']}_{idx}", use_container_width=True):
+                                if delete_item(item['id']):
+                                    st.success(f"✅ '{item['titulo']}' deletado!")
+                                    st.rerun()
+                                else:
+                                    st.error("❌ Erro ao deletar")
                         
                         st.markdown('</div>', unsafe_allow_html=True)
             else:
