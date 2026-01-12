@@ -76,8 +76,8 @@ def search_media(query, media_type=None, tag_filter=None):
 st.markdown("""
 <style>
     :root {
-        --espro-azul: #1E88E5;
-        --espro-azul-claro: #42A5F5;
+        --espro-azul: #003C7E;
+        --espro-azul-claro: #0056B3;
     }
     .espro-header {
         background: linear-gradient(135deg, var(--espro-azul) 0%, var(--espro-azul-claro) 100%);
@@ -245,7 +245,7 @@ elif menu == "➕ Adicionar":
                     descricao = st.text_area("Descrição", placeholder="Opcional...")
                     st.caption(f"{format_bytes(file_size)} | {file_type}")
                 
-                if st.button("💾 Salvar", type="primary", use_container_width=True):
+                if st.button("💾 Salvar", type="primary", use_container_width=True, key="btn_salvar"):
                     if not titulo or not tags_input:
                         st.error("Título e tags são obrigatórios")
                     else:
@@ -267,7 +267,7 @@ elif menu == "➕ Adicionar":
                                 "data_upload": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                             })
                             save_database(db)
-                            st.success("Salvo!")
+                            st.success(f"✅ {file_type} '{titulo.strip()}' enviado com sucesso!")
                             st.balloons()
                             st.rerun()
 
@@ -282,7 +282,7 @@ elif menu == "🔍 Buscar":
         with col1:
             search_query = st.text_input("🔎", placeholder="Buscar...", label_visibility="collapsed")
         with col2:
-            st.button("🔍 Buscar", type="primary", use_container_width=True)
+            st.button("🔍 Buscar", type="primary", use_container_width=True, key="btn_buscar")
         
         col_f, col_r = st.columns([1, 3])
         
@@ -325,7 +325,13 @@ elif menu == "🔍 Buscar":
                         file_path = UPLOAD_DIR / item['arquivo']
                         if file_path.exists():
                             with open(file_path, 'rb') as f:
-                                st.download_button("⬇️ Baixar", f, item['arquivo'], use_container_width=True)
+                                st.download_button(
+                                    label="⬇️ Baixar",
+                                    data=f,
+                                    file_name=item['arquivo'],
+                                    key=f"download_{item['id']}_{idx}",
+                                    use_container_width=True
+                                )
                         
                         st.markdown('</div>', unsafe_allow_html=True)
             else:
